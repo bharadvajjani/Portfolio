@@ -584,6 +584,116 @@
   .radarCanvas{min-height: 520px}
 }
 
+/* ===== Mobile nav + layout fixes ===== */
+.navToggle{
+  display:none;
+  width:44px;height:44px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.03);
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  cursor:pointer;
+  position:relative;
+}
+.navToggle span{
+  display:block;
+  width:18px;height:2px;
+  background: rgba(255,255,255,.78);
+  border-radius:999px;
+}
+.navDrawer{
+  display:none;
+  position:fixed;
+  left:14px; right:14px; top:70px;
+  border-radius: 18px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(14px);
+  padding:10px;
+  z-index:60;
+  box-shadow: 0 30px 90px rgba(0,0,0,.55);
+}
+.drawerLink{
+  display:flex;
+  padding:12px 12px;
+  border-radius:14px;
+  text-decoration:none;
+  color: #eaf0ff;
+  border:1px solid transparent;
+}
+.drawerLink:hover{
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.12);
+}
+
+/* Better type scaling everywhere */
+.h1{ font-size: clamp(34px, 8vw, 56px) !important; }
+.h1__sub{ font-size: clamp(16px, 4.2vw, 20px) !important; }
+.lead{ font-size: clamp(15px, 4.2vw, 18px) !important; }
+
+/* Prevent "ticker" overflow */
+.roleTicker{ max-width: 100%; }
+.roleTicker .role{
+  min-width: 0 !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Make pills & buttons wrap cleanly and stay thumb-friendly */
+.hero__buttons .btn{ padding:12px 14px; }
+.hero__meta{ gap:8px; }
+.pill{ padding:9px 12px; }
+
+/* Reduce heavy effects on touch devices */
+@media (hover: none){
+  .cursorGlow{ display:none !important; }
+}
+
+/* ===== Mobile breakpoint ===== */
+@media (max-width: 900px){
+  .wrap{ padding: 0 16px; }
+
+  /* Header: hide desktop nav, show hamburger */
+  .nav{ display:none !important; }
+  .navToggle{ display:inline-flex; }
+
+  /* Keep header compact */
+  .header__inner{ gap:10px; }
+  .header__cta{ width:auto !important; }
+
+  /* Section spacing */
+  .section{ padding: 72px 0; }
+  .hero{ padding-top: 62px; }
+
+  /* Cards: less padding */
+  .card, .tile, .case{ padding: 16px; }
+
+  /* Grid: single column already, just ensure no overflow */
+  .grid2, .grid3, .stack, .hero__grid, .contact{ grid-template-columns: 1fr !important; }
+
+  /* Portfolio cards: button under title if needed */
+  .snap__top{ flex-direction: column; align-items: stretch; }
+  .snap__top .btn{ width: 100%; }
+
+  /* Tech Radar: give more vertical room */
+  .radarCanvas{ min-height: 620px !important; }
+}
+
+/* ===== Small phones ===== */
+@media (max-width: 420px){
+  .hero__buttons .btn{ width: 100%; }
+  .header__cta{ width:100% !important; justify-content:flex-end; }
+  .navDrawer{ top: 112px; } /* header might wrap on tiny screens */
+}
+
+@media (max-width: 900px){
+  .nodeLabel{ font-size: 11px; padding: 6px 9px; }
+  .node{ gap:6px; }
+}
+
   </style>
 </head>
 
@@ -606,13 +716,25 @@
         <span class="brand__text">BJ</span>
       </a>
 
-      <nav class="nav" aria-label="Primary">
-        <a class="nav__link" href="#capabilities">Capabilities</a>
-        <a class="nav__link" href="#stack">Stack</a>
-        <a class="nav__link" href="#portfolio">Portfolio</a>
-	<a class="nav__link" href="#orgs">Orgs</a>
-        <a class="nav__link" href="#contact">Contact</a>
-      </nav>
+      <nav class="nav" aria-label="Primary" id="nav">
+  <a class="nav__link" href="#capabilities">Capabilities</a>
+  <a class="nav__link" href="#stack">Stack</a>
+  <a class="nav__link" href="#portfolio">Portfolio</a>
+  <a class="nav__link" href="#orgs">Orgs</a>
+  <a class="nav__link" href="#contact">Contact</a>
+</nav>
+
+<button class="navToggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navDrawer">
+  <span></span><span></span>
+</button>
+
+<div class="navDrawer" id="navDrawer" aria-hidden="true">
+  <a class="drawerLink" href="#capabilities">Capabilities</a>
+  <a class="drawerLink" href="#stack">Stack</a>
+  <a class="drawerLink" href="#portfolio">Portfolio</a>
+  <a class="drawerLink" href="#orgs">Orgs</a>
+  <a class="drawerLink" href="#contact">Contact</a>
+</div>
 
       <div class="header__cta">
         <a class="btn btn--ghost magnetic" href="https://www.linkedin.com/in/bharadvajgjani" target="_blank" rel="noreferrer">LinkedIn</a>
@@ -1314,6 +1436,39 @@ document.querySelectorAll(".chipBtn").forEach(btn => {
     renderRadar();
   });
 });
+
+// ===== Mobile nav drawer =====
+const navToggle = document.getElementById("navToggle");
+const navDrawer = document.getElementById("navDrawer");
+
+if (navToggle && navDrawer) {
+  const openDrawer = () => {
+    navDrawer.style.display = "block";
+    navDrawer.setAttribute("aria-hidden", "false");
+    navToggle.setAttribute("aria-expanded", "true");
+  };
+  const closeDrawer = () => {
+    navDrawer.style.display = "none";
+    navDrawer.setAttribute("aria-hidden", "true");
+    navToggle.setAttribute("aria-expanded", "false");
+  };
+
+  navToggle.addEventListener("click", () => {
+    const isOpen = navToggle.getAttribute("aria-expanded") === "true";
+    isOpen ? closeDrawer() : openDrawer();
+  });
+
+  // Close when tapping a link
+  navDrawer.querySelectorAll("a").forEach(a => a.addEventListener("click", closeDrawer));
+
+  // Close if tapping outside
+  document.addEventListener("click", (e) => {
+    const isOpen = navToggle.getAttribute("aria-expanded") === "true";
+    if (!isOpen) return;
+    if (navDrawer.contains(e.target) || navToggle.contains(e.target)) return;
+    closeDrawer();
+  });
+}
 
 
   </script>
